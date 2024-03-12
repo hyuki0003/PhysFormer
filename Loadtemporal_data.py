@@ -77,7 +77,7 @@ class ToTensor (object):
         frame_rate = np.array(frame_rate)
         
         
-        return {'video_x': torch.from_numpy(video_x.astype(np.float)).float(), 'clip_average_HR': torch.from_numpy(clip_average_HR.astype(np.float)).float(), 'ecg': torch.from_numpy(ecg_label.astype(np.float)).float(), 'frame_rate': torch.from_numpy(frame_rate.astype(np.float)).float()}
+        return {'video_x': torch.from_numpy(video_x.astype(float)).float(), 'clip_average_HR': torch.from_numpy(clip_average_HR.astype(float)).float(), 'ecg': torch.from_numpy(ecg_label.astype(float)).float(), 'frame_rate': torch.from_numpy(frame_rate.astype(float)).float()}
 
 
 
@@ -105,6 +105,7 @@ class VIPL_train (Dataset):
         
         
         p = random.random()
+
         if p < 0.5 and start_frame==61:    # sampling aug     p < 0.5
             ecg_label = self.landmarks_frame.iloc[idx, 5:5+160].values 
             video_x, clip_average_HR, ecg_label_new = self.get_single_video_x_aug(video_path, start_frame, clip_average_HR, ecg_label)
@@ -130,12 +131,13 @@ class VIPL_train (Dataset):
         log_file = open('temp.txt', 'w')
         
         image_id = start_frame
+
         for i in range(clip_frames):
             s = "%05d" % image_id
             image_name = 'image_' + s + '.png'
 
             # face video 
-            image_path = os.path.join(video_jpgs_path, image_name)
+            image_path = os.path.join(video_jpgs_path + "/crop_image/", image_name)
             
             
             log_file.write(image_path)
@@ -147,11 +149,13 @@ class VIPL_train (Dataset):
             #cv2.imwrite('test111.jpg', tmp_image)
             
             if tmp_image is None:    # It seems some frames missing 
-                tmp_image = cv2.imread(self.root_dir+'p30/v1/source2/image_00737.png')
+                tmp_image = cv2.imread(self.root_dir+'p30/v1/source2/crop_image/image_00737.png')
             
-            
-            tmp_image = cv2.resize(tmp_image, (128+size_crop, 128+size_crop), interpolation=cv2.INTER_CUBIC)[(size_crop//2):(128+size_crop//2), (size_crop//2):(128+size_crop//2), :]
-            
+            try:
+                tmp_image = cv2.resize(tmp_image, (128+size_crop, 128+size_crop), interpolation=cv2.INTER_CUBIC)[(size_crop//2):(128+size_crop//2), (size_crop//2):(128+size_crop//2), :]
+            except cv2.error as e:
+                print(f"OpenCV resize error: {e}")
+
             video_x[i, :, :, :] = tmp_image  
                         
             image_id += 1
@@ -175,10 +179,10 @@ class VIPL_train (Dataset):
                     image_id = start_frame + tt//2
                     s = "%05d" % image_id
                     image_name = 'image_' + s + '.png'
-                    image_path = os.path.join(video_jpgs_path, image_name)
+                    image_path = os.path.join(video_jpgs_path + "/crop_image/", image_name)
                     tmp_image = cv2.imread(image_path)
                     if tmp_image is None:    # It seems some frames missing 
-                        tmp_image = cv2.imread(self.root_dir+'p30/v1/source2/image_00737.png')
+                        tmp_image = cv2.imread(self.root_dir+'p30/v1/source2/crop_image/image_00737.png')
                     ecg_label_new[tt] = ecg_label[tt//2]
                     
                 else:
@@ -186,16 +190,16 @@ class VIPL_train (Dataset):
                     image_id2 = image_id1+1
                     s = "%05d" % image_id1
                     image_name = 'image_' + s + '.png'
-                    image_path = os.path.join(video_jpgs_path, image_name)
+                    image_path = os.path.join(video_jpgs_path + "/crop_image/", image_name)
                     tmp_image1 = cv2.imread(image_path)
                     s = "%05d" % image_id2
                     image_name = 'image_' + s + '.png'
-                    image_path = os.path.join(video_jpgs_path, image_name)
+                    image_path = os.path.join(video_jpgs_path + "/crop_image/", image_name)
                     tmp_image2 = cv2.imread(image_path)
                     if tmp_image1 is None:    # It seems some frames missing 
-                        tmp_image1 = cv2.imread(self.root_dir+'p30/v1/source2/image_00737.png')
+                        tmp_image1 = cv2.imread(self.root_dir+'p30/v1/source2/crop_image/image_00737.png')
                     if tmp_image2 is None:    # It seems some frames missing 
-                        tmp_image2 = cv2.imread(self.root_dir+'p30/v1/source2/image_00737.png')
+                        tmp_image2 = cv2.imread(self.root_dir+'p30/v1/source2/crop_image/image_00737.png')
                     
                     tmp_image = tmp_image1//2+tmp_image2//2    # mean linear interpolation
                     ecg_label_new[tt] = ecg_label[tt//2]/2+ecg_label[tt//2+1]/2
@@ -213,10 +217,10 @@ class VIPL_train (Dataset):
                 image_id = start_frame + tt*2
                 s = "%05d" % image_id
                 image_name = 'image_' + s + '.png'
-                image_path = os.path.join(video_jpgs_path, image_name)
+                image_path = os.path.join(video_jpgs_path + "/crop_image/", image_name)
                 tmp_image = cv2.imread(image_path)
                 if tmp_image is None:    # It seems some frames missing 
-                    tmp_image = cv2.imread(self.root_dir+'p30/v1/source2/image_00737.png')
+                    tmp_image = cv2.imread(self.root_dir+'p30/v1/source2/crop_image/image_00737.png')
                 
                 tmp_image = cv2.resize(tmp_image, (128+size_crop, 128+size_crop), interpolation=cv2.INTER_CUBIC)[(size_crop//2):(128+size_crop//2), (size_crop//2):(128+size_crop//2), :]
                 

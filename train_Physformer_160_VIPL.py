@@ -19,7 +19,8 @@ import scipy.io as sio
 from model import ViT_ST_ST_Compact3_TDC_gra_sharp
 
  
-from Loadtemporal_data import VIPL_train, VIPL_test, Normaliztion, ToTensor, RandomHorizontalFlip 
+from Loadtemporal_data import VIPL_train, Normaliztion, ToTensor, RandomHorizontalFlip
+
 
 from TorchLossComputer import TorchLossComputer
 
@@ -105,7 +106,7 @@ class AvgrageMeter(object):
 
 # main function
 def train_test():
-    # GPU  & log file  -->   if use DataParallel, please comment this command
+    #GPU  & log file  -->   if use DataParallel, please comment this command
     #os.environ["CUDA_VISIBLE_DEVICES"] = "%d" % (args.gpu)
 
     isExists = os.path.exists(args.log)
@@ -122,7 +123,7 @@ def train_test():
     
 
     # Dataset root
-    VIPL_root_list = args.input_data + '/VIPL_frames/'
+    VIPL_root_list = args.input_data
     VIPL_train_list = 'VIPL_fold1_train.txt'
     #VIPL_test_list = 'VIPL_fold1_test.txt'
     
@@ -131,18 +132,18 @@ def train_test():
     print('train from scratch!\n')
     log_file.write('train from scratch!\n')
     log_file.flush()
-    
-    
+
+
 
     model = ViT_ST_ST_Compact3_TDC_gra_sharp(image_size=(160,128,128), patches=(4,4,4), dim=96, ff_dim=144, num_heads=4, num_layers=12, dropout_rate=0.1, theta=0.7)
-     
+
     model = model.cuda()
 
     lr = args.lr
     optimizer1 = optim.Adam(model.parameters(), lr=lr, weight_decay=0.00005)
     #optimizer1 = optim.AdamW(model.parameters(), lr=lr, weight_decay=0.05)
     scheduler1 = optim.lr_scheduler.StepLR(optimizer1, step_size=args.step_size, gamma=args.gamma)
-        
+
     criterion_reg = nn.MSELoss()
     criterion_L1loss = nn.L1Loss()
     criterion_class = nn.CrossEntropyLoss()
@@ -273,7 +274,7 @@ def train_test():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="save quality using landmarkpose model")
     parser.add_argument('--gpu', type=int, default=2, help='the gpu id used for predict')
-    parser.add_argument('--input_data', type=str, default="/scratch/project_2003204/") # /scratch/project_2003204/VIPL_frames_Matlab/
+    parser.add_argument('--input_data', type=str, default="F:/dataset/VIPL_HR/data/")
     parser.add_argument('--lr', type=float, default=0.0001, help='initial learning rate')  #default=0.0001
     parser.add_argument('--batchsize', type=int, default=4, help='batchsize')
     parser.add_argument('--step_size', type=int, default=50, help='stepsize of optim.lr_scheduler.StepLR, how many epochs lr decays once')

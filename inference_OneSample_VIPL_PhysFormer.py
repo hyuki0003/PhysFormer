@@ -64,7 +64,7 @@ def train_test():
     
     
     
-    VIPL_root_list = args.input_data + '/VIPL_frames/'
+    VIPL_root_list = args.input_data
     VIPL_test_list = 'VIPL_fold1_test1.txt'
     
         
@@ -100,39 +100,50 @@ def train_test():
             
             rPPG_long = torch.randn(1).cuda()
      
-            #HR = 0.0
+            HR = 0.0
             for clip in range(inputs.shape[1]):
                 rPPG, Score1, Score2, Score3 = model(inputs[:,clip,:,:,:,:], gra_sharp)
                 
                 
                 rPPG = rPPG[0, 30:30+160]
                 
-                #HR_predicted = TorchLossComputer.cross_entropy_power_spectrum_forward_pred(rPPG, frame_rate)+40
-                #HR += HR_predicted
+                HR_predicted = TorchLossComputer.cross_entropy_power_spectrum_forward_pred(rPPG, frame_rate)+40
+                HR += HR_predicted
                 
                 rPPG_long = torch.cat((rPPG_long, rPPG),dim=0)
             
-            #HR = HR/inputs.shape[1]
+            HR = HR/inputs.shape[1]
     
             log_file.write('\n sample number :%d \n' % (i+1))
             log_file.write('\n')
             log_file.flush()
             
-            visual = FeatureMap2Heatmap(inputs[:,inputs.shape[1]-1,:,:,:,:], Score1, Score2, Score3)
+            ## visual = FeatureMap2Heatmap(inputs[:,inputs.shape[1]-1,:,:,:,:], Score1, Score2, Score3)
   
             
             ## save the results as .mat 
             results_rPPG.append(rPPG_long[1:].cpu().data.numpy())
-            #results_HR_pred.append([HR.cpu().data.numpy(), clip_average_HR[0].cpu().data.numpy()])
+            results_HR_pred.append([HR.cpu().data.numpy(), clip_average_HR[0].cpu().data.numpy()])
   
     
-    # visual and save 
-    #visual = FeatureMaP2Heatmap(x_visual, x_visual3232, x_visual1616)
-    sio.savemat( args.log+'/'+args.log+ '.mat' , {'outputs_rPPG_concat': results_rPPG})   
-    #sio.savemat( args.log+'/'+args.log+ '_HR.mat' , {'outputs_HR': results_HR_pred})     
+    ##visual and save
+    ## visual = FeatureMap2Heatmap(x_visual, x_visual3232, x_visual1616)
+    sio.savemat( args.log+'/'+args.log+ '.mat' , {'outputs_rPPG_concat': results_rPPG})
+    sio.savemat( args.log+'/'+args.log+ '_HR.mat' , {'outputs_HR': results_HR_pred})
 
-       
- 
+    print(results_rPPG)
+    results_rPPG = results_rPPG[0]
+    x_values = np.arange(len(results_rPPG))
+
+    print(x_values)
+
+    ## print(results_HR_pred)
+
+    plt.plot(x_values, results_rPPG)  # marker 옵션은 각 데이터 포인트를 나타내는 마커를 설정합니다.
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.title('1D')
+    plt.show()
 
     print('Finished val')
     log_file.close()
@@ -141,7 +152,7 @@ def train_test():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="save quality using landmarkpose model")
     parser.add_argument('--gpu', type=int, default=2, help='the gpu id used for predict')
-    parser.add_argument('--input_data', type=str, default="/scratch/project_2003204/") # /scratch/project_2003204/VIPL_frames_Matlab/
+    parser.add_argument('--input_data', type=str, default="/Pycharm/PF/") # /Pycharm/PF/p10/
     parser.add_argument('--lr', type=float, default=0.0001, help='initial learning rate')  #default=0.0001
     parser.add_argument('--step_size', type=int, default=12, help='stepsize of optim.lr_scheduler.StepLR, how many epochs lr decays once')
     parser.add_argument('--gamma', type=float, default=0.1, help='gamma of optim.lr_scheduler.StepLR, decay of lr')

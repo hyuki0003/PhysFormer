@@ -8,7 +8,7 @@ from torch import nn
 from torch.nn import functional as F
 import math
 
-from .transformer_layer import Transformer_ST_TDC_gra_sharp
+from model.transformer_layer import Transformer_ST_TDC_gra_sharp
 
 import pdb
 
@@ -79,7 +79,7 @@ class ViT_ST_ST_Compact3_TDC_gra_sharp(nn.Module):
         super().__init__()
 
         
-        self.image_size = image_size  
+        self.image_size = image_size
         self.frame = frame  
         self.dim = dim              
 
@@ -87,6 +87,7 @@ class ViT_ST_ST_Compact3_TDC_gra_sharp(nn.Module):
         t, h, w = as_tuple(image_size)  # tube sizes
         ft, fh, fw = as_tuple(patches)  # patch sizes, ft = 4 ==> 160/4=40
         gt, gh, gw = t//ft, h // fh, w // fw  # number of patches
+
         seq_len = gh * gw * gt
 
         # Patch embedding    [4x16x16]conv

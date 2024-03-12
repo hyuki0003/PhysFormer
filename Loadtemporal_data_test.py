@@ -49,7 +49,7 @@ class ToTensor (object):
         
         clip_average_HR_peaks = np.array(clip_average_HR_peaks)
         
-        return {'video_x': torch.from_numpy(video_x.astype(np.float)).float(), 'framerate': torch.from_numpy(framerate.astype(np.float)).double(), 'clip_average_HR_peaks': torch.from_numpy(clip_average_HR_peaks.astype(np.float)).float()}
+        return {'video_x': torch.from_numpy(video_x.astype(float)).float(), 'framerate': torch.from_numpy(framerate.astype(float)).double(), 'clip_average_HR_peaks': torch.from_numpy(clip_average_HR_peaks.astype(float)).float()}
 
 
 class VIPL (Dataset):
@@ -102,7 +102,7 @@ class VIPL (Dataset):
                 
                 #if tmp_image is None:    # It seems some frames missing 
                 #    tmp_image = cv2.imread(self.root_dir+'p30/v1/source2/image_00737.png')
-                    
+
                 tmp_image = cv2.resize(tmp_image, (132, 132), interpolation=cv2.INTER_CUBIC)[2:130, 2:130, :]
                 
                 video_x[tt, i, :, :, :] = tmp_image  
